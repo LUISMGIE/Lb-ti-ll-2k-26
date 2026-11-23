@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consulta POS</title>
+<link rel="manifest" href="consulta.webmanifest">
+<meta name="theme-color" content="#76234d">
+<link rel="icon" href="consulta-192.png">
+<link rel="apple-touch-icon" href="consulta-192.png">
+<style>
+/* VOICE: elegante y tranquila, herramienta de mostrador
+   IDEA: tarjeta de catálogo de salón de uñas
+   PICTURE: la lista misma, con contadores arriba
+   COLOUR and TYPE: rosa Lula, ciruela, dorado; system-ui
+   LAYOUT: una columna, encabezado de marca, contadores, pestañas, lista */
+:root{color-scheme:light dark;
+--bg:light-dark(#f8f2f6,#170f16);--paper:light-dark(#fff,#221821);--ink:light-dark(#241b25,#f6ecf3);--mut:light-dark(#786b77,#b7a5b3);
+--line:light-dark(#eadfe7,#3a2b37);--pink:light-dark(#b51f70,#f07ab5);--soft:light-dark(#fceaf2,#3b1c2f);--gold:light-dark(#9a7130,#d9b06a);
+--ok:light-dark(#187653,#62d3a3);--bad:light-dark(#b3263e,#ff8f9e);--badbg:light-dark(#fff0f1,#3a1820)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;min-height:44px;border-radius:12px;padding:10px 14px;font-weight:700}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+.shell{max-width:860px;margin:auto;padding:14px 16px 32px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 12px}
+.brand{display:flex;align-items:center;gap:11px}
+.mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#d94a91,#941657);display:grid;place-items:center;color:#fff;font-weight:900;flex:none}
+.eye{font-size:13px;color:var(--gold);font-weight:800}
+h1{font-size:21px;line-height:1.1;margin:2px 0 0}
+.mut{color:var(--mut);font-size:14px}
+.primary{background:var(--pink);color:#fff}.soft{background:var(--soft);color:var(--pink)}.danger{background:var(--badbg);color:var(--bad)}
+.hero{background:linear-gradient(120deg,#3b1e32,#76234d 60%,#a52b68);color:#fff;border-radius:20px;padding:18px 19px;margin-bottom:12px}
+.hero h2{font-size:20px;margin:0 0 4px}.hero p{margin:0;color:#f4dce8;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 12px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:11px 12px}
+.stat b{display:block;font-size:clamp(19px,5vw,24px)}.stat span{font-size:13px;color:var(--mut)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:13px;padding:4px;gap:4px;margin-bottom:12px}
+.tabs button{background:transparent;color:var(--mut)}.tabs button.on{background:var(--paper);color:var(--pink)}
+input[type=search],textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:13px;padding:11px 13px;font-size:16px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 2px}
+.chip{flex:none;white-space:nowrap;border:1px solid var(--line);background:var(--paper);color:var(--mut);border-radius:99px;padding:8px 12px;font-size:13px;min-height:40px}
+.chip.on{background:var(--soft);border-color:var(--pink);color:var(--pink)}
+.meta{color:var(--mut);font-size:13px;padding:10px 2px 2px}
+.item{border:1px solid var(--line);border-radius:15px;padding:12px;margin:8px 0}
+.it{display:flex;justify-content:space-between;gap:12px}
+.name{font-weight:800}.code{font-size:13px;color:var(--mut);margin-top:3px}
+.price{font-weight:850;font-size:17px;text-align:right;white-space:nowrap}
+.st{font-size:13px;font-weight:800;text-align:right;margin-top:3px;white-space:nowrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.pill{flex:none;background:var(--soft);color:var(--pink);border-radius:99px;padding:3px 9px;font-size:13px;font-weight:800;height:fit-content}
+.links{display:flex;gap:6px 14px;flex-wrap:wrap;margin-top:8px;font-size:14px}
+.links a{color:var(--pink);font-weight:700;text-decoration:none}
+.pts{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);font-size:14px}
+.empty{text-align:center;padding:24px 10px;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1;min-width:140px}
+.msg{border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px;background:var(--badbg);color:var(--bad)}
+.msg.good{background:var(--soft);color:var(--pink)}
+.file{width:100%;padding:10px;border:1px dashed var(--line);border-radius:12px;font-size:16px}
+.dlg{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:16px;z-index:9}
+.dlg>div{background:var(--paper);border-radius:18px;padding:18px;max-width:400px;width:100%}
+.dlg p{margin:0 0 14px}
+.th{flex:none;min-height:40px;padding:8px 12px;font-size:13px}
+.foot{text-align:center;color:var(--mut);font-size:13px;padding:16px 0}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top"><div class="brand"><div class="mark">LB</div><div><div class="eye">LULA BEAUTY BOX</div><h1>Consulta POS</h1></div></div><button class="soft th" id="th" type="button">Tema: Auto</button></header>
+<div id="app"></div>
+<div class="foot">Solo lectura · No vende ni modifica nada del POS</div>
+</main>
+<div id="dlg"></div>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2=n=>Math.round((n+Number.EPSILON)*100)/100;
+const money=n=>'$'+r2(+n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nz=s=>String(s??'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ /g,' ');
+/* todas las palabras, en cualquier orden */
+const fz=(t,q)=>{t=nz(t);return nz(q).split(/\s+/).filter(Boolean).every(w=>t.includes(w))};
+const per=(d=new Date())=>d.getFullYear()+(d.getMonth()<6?'A':'B');
+const pts=c=>r2((c.lots||[]).filter(l=>l.p==per()).reduce((a,l)=>a+(+l.a||0),0));
+const expTxt=()=>{const d=new Date();return d.getMonth()<6?'30 de junio de '+d.getFullYear():'31 de diciembre de '+d.getFullYear()};
+const GR=[['Limas',/\blimas?\b|\bbuffer|lijas?\b/],['Pinceles',/pincel|brocha/],['Fresas y bits',/drill|\bbits?\b|fresa|carbide|\btorno/],['Lámparas',/lampara|\blamp\b|\bled\b|\buv\b/],['Cursos',/curso|capacitacion/],['Desechables',/desechable/],['Desinfectantes',/desinfect|sanitiz|alcohol|esteriliz/],['Pedicura',/pedicur/],['Spa y cuidado',/aceite|cuticul|crema|hidrata|exfol|bioonce|spa\b|jabon|lotion|massage|scrub|antisept|antihongos|hemostat|dead skin|sea salt|mask|biojelly/],['Líquidos y monómeros',/monomero|acetona|primer|deshidrat|removedor|remover|cleaner|limpiador|liquido/],['Acrílicos y polvos',/acrilic|polvo|acrylove|acrygel/],['Builders y bases',/builder|rubber|saturacion|\bbase\b|\btop\b|fortalec|booster|\bgel tips?\b|mousse|strong/],['Semipermanentes y gel de color',/semipermanente|\bgamas?\b|painting|metalico|perla|reflectiv|gel|cat ?eye|ojo de gato|ojo gato|nailaq|flakes|spring|candy|tintas|ultra (white|black)/],['Pigmentos y glitter',/pigment|glitter|efecto|aurora|sombra/],['Tips y uñas',/\btips?\b|\bunas?\b|forma|molde|pegamento|glue/],['Decoración',/deco|dije|sticker|stiker|pedreria|cristal|foil|arte|naturaleza|coleccion|piedra|encapsul/],['Herramientas y accesorios',/herramient|accesorio|pinza|tijera|cortador|espatula|empujador|nipper|organizador|mandil|neceser|bolsa|estuche|mesa|cojin|brazo|bote|tarro|lima/]];
+const grpOf=p=>{if(p.grp)return p.grp;const t=nz((p.cat||'')+' '+p.name);for(const[n,r]of GR)if(r.test(t))return n;return 'Otros'};
+const avail=p=>(+p.stock||0)-(+p.res||0);
+const isAv=p=>!p.off&&avail(p)>0;
+
+let D=null,tab='prod',q='',cat=null,sf='all',loading=false,msg='',cats=[];
+try{D=JSON.parse(localStorage.getItem('consulta1')||'null')}catch(e){}
+if(!D||!Array.isArray(D.products)||!Array.isArray(D.customers))D=null;
+
+/* ventana de confirmación dentro de la página */
+function ask(text,okTxt,danger){return new Promise(res=>{
+  $('#dlg').innerHTML='<div class="dlg"><div><p>'+esc(text)+'</p><div class="row"><button class="soft" id="dno">Cancelar</button><button class="'+(danger?'danger':'primary')+'" id="dok">'+esc(okTxt)+'</button></div></div></div>';
+  const done=v=>{$('#dlg').innerHTML='';res(v)};$('#dno').onclick=()=>done(false);$('#dok').onclick=()=>done(true);$('#dok').focus()})}
+
+async function load(txt){
+  let o;try{o=JSON.parse(txt)}catch(e){msg='El archivo no se pudo leer. ¿Es el respaldo del POS?';return render()}
+  if(!o||o.app!='pos-unas'||!o.S||!Array.isArray(o.S.products)){msg='Ese archivo no es un respaldo del POS.';return render()}
+  if(D&&!await ask('Se cambiarán los datos que tienes cargados por los de este respaldo. ¿Continuar?','Sí, cambiar'))return;
+  const S=o.S;
+  const next={at:o.at,biz:(S.settings&&S.settings.biz)||'',
+    products:S.products.map(p=>({id:p.id,code:p.code,name:p.name,price:p.price,stock:p.stock,res:p.res||0,off:!!p.off,cat:p.cat||'',grp:p.grp||''})),
+    customers:(S.customers||[]).map(c=>({name:c.name,biz:c.biz,tel:c.tel,email:c.email,addr:c.addr,border:!!c.border,lots:c.lots||[]}))};
+  D=next;try{localStorage.setItem('consulta1',JSON.stringify(D))}catch(e){}
+  loading=false;tab='prod';q='';cat=null;sf='all';msg='';render();
+}
+function pickFile(){const f=$('#fl').files[0];if(!f){msg='Elige el archivo de respaldo.';return render()}const r=new FileReader();r.onload=()=>load(r.result);r.onerror=()=>{msg='No se pudo leer el archivo.';render()};r.readAsText(f)}
+function pasteLoad(){const t=$('#ft').value.trim();if(!t){msg='Pega el contenido del respaldo.';return render()}load(t)}
+async function clearData(){
+  if(!await ask('¿Borrar de este aparato los productos y clientes cargados? El POS y tu respaldo en Drive no se tocan.','Borrar',true))return;
+  if(!await ask('Última confirmación: ¿borrar los datos de esta consulta?','Sí, borrar',true))return;
+  D=null;try{localStorage.removeItem('consulta1')}catch(e){}msg='';render()}
+
+function catNames(){const c={};D.products.forEach(p=>{const n=grpOf(p);c[n]=(c[n]||0)+1});return Object.keys(c).sort((a,b)=>a=='Otros'?1:b=='Otros'?-1:a.localeCompare(b,'es')).map(n=>({n,c:c[n]}))}
+
+function prodRow(p){const av=avail(p);
+  return '<article class="item"><div class="it"><div><div class="name">'+esc(p.name||'Producto sin nombre')+'</div><div class="code">'+esc(p.code||'Sin código')+' · '+esc(grpOf(p))+'</div></div><div><div class="price">'+(+p.price>0?money(p.price):'Precio manual')+'</div><div class="st '+(isAv(p)?'ok':'bad')+'">'+(p.off?'No disponible':av>0?av+' en existencia':'Agotado')+'</div></div></div>'+(p.res?'<div class="code">'+esc(p.res)+' piezas apartadas</div>':'')+'</article>'}
+function custRow(c){const t=String(c.tel||'').replace(/\D/g,''),pt=pts(c);
+  return '<article class="item"><div class="it"><div class="name">'+esc(c.name||'Cliente sin nombre')+'</div><span class="pill">IVA '+(c.border?8:16)+'%</span></div>'+(c.biz?'<div class="code">'+esc(c.biz)+'</div>':'')
+  +'<div class="links">'+(t?'<a href="tel:'+t+'">Llamar · '+esc(c.tel)+'</a>':'')+(t.length>=10?'<a href="https://wa.me/'+(t.length==10?'52'+t:t)+'" target="_blank" rel="noopener">WhatsApp</a>':'')+(c.email?'<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>':'')+'</div>'
+  +(c.addr?'<div class="code">'+esc(c.addr)+'</div>':'')
+  +'<div class="pts">Puntos: <b class="'+(pt>0?'ok':'')+'">'+money(pt)+'</b>'+(pt>0?' <span class="code">· vencen el '+expTxt()+'</span>':'')+'</div></article>'}
+
+function list(){const el=$('#list');if(!el)return;let L;
+  if(tab=='prod'){L=D.products;if(cat)L=L.filter(p=>grpOf(p)==cat);
+    if(sf=='av')L=L.filter(isAv);if(sf=='no')L=L.filter(p=>!isAv(p));
+    if(q.trim())L=L.filter(p=>fz((p.name||'')+' '+(p.code||'')+' '+grpOf(p),q));
+    L=L.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'))}
+  else{L=D.customers;if(q.trim())L=L.filter(c=>fz([c.name,c.biz,c.tel,c.email].join(' '),q));
+    L=L.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'))}
+  const n=L.length;
+  el.innerHTML='<div class="meta">'+n+(tab=='prod'?' producto(s)':' cliente(s)')+(cat&&tab=='prod'?' en «'+esc(cat)+'»':'')+(n>80?' · mostrando 80, escribe para acotar':'')+'</div>'
+   +(L.slice(0,80).map(tab=='prod'?prodRow:custRow).join('')||'<div class="empty"><b>No se encontró nada</b><br>Prueba con otra palabra o quita un filtro.</div>')}
+
+function loader(){return '<section class="panel"><b>Cargar el respaldo del POS</b><p class="mut">Elige el archivo <b>pos-respaldo.json</b> de tu carpeta «Respaldo POS» en Google Drive (o cualquier respaldo descargado del POS).</p><input class="file" type="file" id="fl"><div class="row" style="margin-top:10px"><button class="primary" id="bf">Cargar archivo</button>'+(D?'<button class="soft" id="bx">Cancelar</button>':'')+'</div><details style="margin-top:12px"><summary class="mut" style="cursor:pointer">Si el celular no te deja elegir el archivo, pega su contenido aquí</summary><textarea id="ft" rows="3" style="margin-top:8px" placeholder="Pega aquí el contenido del respaldo"></textarea><button class="soft" id="bp" style="margin-top:8px">Cargar texto pegado</button></details></section>'}
+
+function render(){const a=$('#app');const m=msg?'<div class="msg">'+esc(msg)+'</div>':'';
+  if(!D){a.innerHTML='<section class="hero"><h2>Tu inventario, siempre a la mano</h2><p>Productos, precios, existencias y clientes, sin modificar el POS.</p></section>'+m+loader();bindLoader();return}
+  const d=D.at?new Date(D.at).toLocaleString('es-MX'):'fecha desconocida';
+  const av=D.products.filter(isAv).length;cats=catNames();
+  a.innerHTML='<div class="stats"><div class="stat"><b>'+D.products.length+'</b><span>Productos</span></div><div class="stat"><b class="ok">'+av+'</b><span>Disponibles</span></div><div class="stat"><b>'+D.customers.length+'</b><span>Clientes</span></div></div>'
+  +'<div class="mut">'+esc(D.biz?D.biz+' · ':'')+'Respaldo del '+esc(d)+'</div>'+m
+  +(loading?loader():'')
+  +'<section class="panel"><div class="tabs"><button data-t="prod" class="'+(tab=='prod'?'on':'')+'">Productos</button><button data-t="cli" class="'+(tab=='cli'?'on':'')+'">Clientes</button></div>'
+  +'<input type="search" id="q" placeholder="'+(tab=='prod'?'Buscar por nombre, código o categoría':'Buscar por nombre, negocio, teléfono o correo')+'" value="'+esc(q)+'">'
+  +(tab=='prod'?'<div class="chips"><button class="chip '+(!cat?'on':'')+'" data-c="-1">Todas</button>'+cats.map((x,i)=>'<button class="chip '+(cat==x.n?'on':'')+'" data-c="'+i+'">'+esc(x.n)+' · '+x.c+'</button>').join('')+'</div>'
+    +'<div class="chips"><button class="chip '+(sf=='all'?'on':'')+'" data-s="all">Todos</button><button class="chip '+(sf=='av'?'on':'')+'" data-s="av">Disponibles</button><button class="chip '+(sf=='no'?'on':'')+'" data-s="no">Agotados / no disponibles</button></div>':'')
+  +'<div id="list"></div></section>'
+  +'<section class="panel"><div class="row"><button class="soft" id="bl">Cargar otro respaldo</button><button class="danger" id="bc">Borrar datos de este aparato</button></div><p class="mut" style="margin:8px 0 0">Al cargar otro respaldo, los datos actuales se quedan hasta que confirmes el cambio.</p></section>';
+  a.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;q='';cat=null;sf='all';render()});
+  a.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const i=+b.dataset.c;const n=i<0?null:cats[i].n;cat=cat==n?null:n;render()});
+  a.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{sf=b.dataset.s;render()});
+  $('#q').oninput=e=>{q=e.target.value;list()};
+  $('#bl').onclick=()=>{loading=true;msg='';render();$('#fl').scrollIntoView({block:'center'})};
+  $('#bc').onclick=clearData;
+  if(loading)bindLoader();
+  list()}
+function bindLoader(){$('#bf').onclick=pickFile;$('#bp').onclick=pasteLoad;const x=$('#bx');if(x)x.onclick=()=>{loading=false;msg='';render()}}
+render();
+}
+</script>
+<script>
+{
+const T=['auto','light','dark'],NM={auto:'Tema: Auto',light:'Tema: Claro',dark:'Tema: Oscuro'};
+let t='auto';try{t=localStorage.getItem('consulta_tema')||'auto'}catch(e){}
+if(!NM[t])t='auto';
+const ap=()=>{const r=document.documentElement;if(t=='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);document.getElementById('th').textContent=NM[t]};
+document.getElementById('th').onclick=()=>{t=T[(T.indexOf(t)+1)%3];try{localStorage.setItem('consulta_tema',t)}catch(e){}ap()};
+ap();
+}
+</script>
+<script>
+if('serviceWorker' in navigator&&isSecureContext)addEventListener('load',()=>navigator.serviceWorker.register('consulta-sw.js',{scope:'./consulta'}).catch(()=>{}));
+</script>
+</body>
+</html>

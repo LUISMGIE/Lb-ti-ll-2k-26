@@ -1,0 +1,14 @@
+{
+  "id": "consulta",
+  "name": "Consulta POS · Lula Beauty Box",
+  "short_name": "Consulta POS",
+  "start_url": "./consulta.html",
+  "scope": "./consulta",
+  "display": "standalone",
+  "background_color": "#f8f2f6",
+  "theme_color": "#76234d",
+  "icons": [
+    {"src": "consulta-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "consulta-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
